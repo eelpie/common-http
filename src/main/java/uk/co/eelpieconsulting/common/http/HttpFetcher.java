@@ -17,10 +17,17 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 
@@ -31,7 +38,14 @@ public class HttpFetcher {
 	private static final String ACCEPT_ENCODING = "Accept-Encoding";
 	private static final int HTTP_TIMEOUT = 15000;
 
+	private HttpParams params;
+	private ClientConnectionManager connectionManager;
+
 	public HttpFetcher() {
+		params = new BasicHttpParams();
+	    SchemeRegistry registry = new SchemeRegistry();
+	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+	    connectionManager = new ThreadSafeClientConnManager(params, registry);
 	}
 	
 	public String fetchContent(String url) throws HttpFetchException {
@@ -62,7 +76,7 @@ public class HttpFetcher {
 	}
 	
 	private HttpClient setupHttpClient() {
-		HttpClient client = new DefaultHttpClient();	// TODO Is this thread safe? Move to a pooled connection
+	    HttpClient client = new DefaultHttpClient(connectionManager, params);	    
 		((AbstractHttpClient) client)
 				.addRequestInterceptor(new HttpRequestInterceptor() {
 					public void process(final HttpRequest request,
