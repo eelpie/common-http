@@ -60,7 +60,7 @@ public class HttpFetcher {
 			final HttpResponse response = executeRequest(get);
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode == HttpStatus.SC_OK) {
-				return new String(EntityUtils.toByteArray(response.getEntity()), UTF_8);
+				return EntityUtils.toString(response.getEntity(), UTF_8);
 			}
 			
 			EntityUtils.consume(response.getEntity());			
