@@ -16,6 +16,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
@@ -48,13 +49,17 @@ public class HttpFetcher {
 	    connectionManager = new ThreadSafeClientConnManager(params, registry);
 	}
 	
-	public String fetchContent(String url) throws HttpFetchException {
-		return httpFetch(url);		
+	public String get(String url) throws HttpFetchException {
+		final HttpGet get = new HttpGet(url);
+		return executeRequestAndReadResponseBody(get);
 	}
 	
-	private String httpFetch(String url) throws HttpFetchException {
+	public String post(HttpPost post) throws HttpFetchException {
+		return executeRequestAndReadResponseBody(post);		
+	}
+	
+	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpFetchException {
 		try {
-			final HttpGet get = new HttpGet(url);
 			get.addHeader(new BasicHeader(ACCEPT_ENCODING, GZIP));
 
 			final HttpResponse response = executeRequest(get);
@@ -68,7 +73,7 @@ public class HttpFetcher {
 			
 		} catch (Exception e) {
 			throw new HttpFetchException();
-		}		
+		}
 	}
 	
 	private HttpResponse executeRequest(HttpRequestBase request) throws IOException, ClientProtocolException {
