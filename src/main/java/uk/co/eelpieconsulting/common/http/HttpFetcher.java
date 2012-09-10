@@ -68,11 +68,11 @@ public class HttpFetcher {
 				return EntityUtils.toString(response.getEntity(), UTF_8);
 			}
 			
-			EntityUtils.consume(response.getEntity());			
-			throw new HttpFetchException();	// TODO be more specific. ie include http status code
+			EntityUtils.consume(response.getEntity());
+			throw new HttpFetchException(new RuntimeException("Non 200 http response code: " + statusCode));
 			
 		} catch (Exception e) {
-			throw new HttpFetchException();
+			throw new HttpFetchException(e);
 		}
 	}
 	
