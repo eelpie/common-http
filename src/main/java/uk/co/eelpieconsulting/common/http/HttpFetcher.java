@@ -54,14 +54,17 @@ public class HttpFetcher {
 		return executeRequestAndReadResponseBody(get);
 	}
 	
+	public byte[] getBytes(String url) throws HttpFetchException {
+		final HttpGet get = new HttpGet(url);
+		return executeRequestAndReadBytes(get);
+	}
+	
 	public String post(HttpPost post) throws HttpFetchException {
 		return executeRequestAndReadResponseBody(post);		
 	}
 	
 	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpFetchException {
 		try {
-			get.addHeader(new BasicHeader(ACCEPT_ENCODING, GZIP));
-
 			final HttpResponse response = executeRequest(get);
 			final int statusCode = response.getStatusLine().getStatusCode();
 			if (statusCode == HttpStatus.SC_OK) {
@@ -76,7 +79,24 @@ public class HttpFetcher {
 		}
 	}
 	
+	private byte[] executeRequestAndReadBytes(final HttpRequestBase get) throws HttpFetchException {
+		try {
+			final HttpResponse response = executeRequest(get);
+			final int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode == HttpStatus.SC_OK) {
+				return EntityUtils.toByteArray(response.getEntity());
+			}
+			
+			EntityUtils.consume(response.getEntity());
+			throw new HttpFetchException(new RuntimeException("Non 200 http response code: " + statusCode));
+			
+		} catch (Exception e) {
+			throw new HttpFetchException(e);
+		}
+	}
+	
 	private HttpResponse executeRequest(HttpRequestBase request) throws IOException, ClientProtocolException {
+		request.addHeader(new BasicHeader(ACCEPT_ENCODING, GZIP));
 		return setupHttpClient().execute(request);
 	}
 	
