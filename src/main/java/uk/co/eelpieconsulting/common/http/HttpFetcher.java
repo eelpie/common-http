@@ -28,6 +28,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -38,7 +39,7 @@ public class HttpFetcher {
 	private static final String GZIP = "gzip";
 	private static final String ACCEPT_ENCODING = "Accept-Encoding";
 	private static final int HTTP_TIMEOUT = 15000;
-
+	
 	private HttpParams params;
 	private ClientConnectionManager connectionManager;
 
@@ -129,8 +130,8 @@ public class HttpFetcher {
 			}
 		});
 		
-		client.getParams().setParameter("http.socket.timeout", new Integer(HTTP_TIMEOUT));	// TODO Is there an apache http constant for this?
-		client.getParams().setParameter("http.connection.timeout", new Integer(HTTP_TIMEOUT));
+		client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, new Integer(HTTP_TIMEOUT));
+		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, new Integer(HTTP_TIMEOUT));
 		return client;
 	}
 
