@@ -2,6 +2,7 @@ package uk.co.eelpieconsulting.common.http;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -32,8 +33,11 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 public class HttpFetcher {
+	
+	private static final Logger log = Logger.getLogger(HttpFetcher.class);
 	
 	private static final String UTF_8 = "UTF-8";
 	private static final String GZIP = "gzip";
@@ -50,48 +54,51 @@ public class HttpFetcher {
 	    connectionManager = new ThreadSafeClientConnManager(params, registry);
 	}
 	
-	public String get(String url) throws HttpFetchException {
-		final HttpGet get = new HttpGet(url);
-		return executeRequestAndReadResponseBody(get);
+	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.info("Executing GET to: " + url);
+		return executeRequestAndReadResponseBody(new HttpGet(url));
 	}
 	
-	public byte[] getBytes(String url) throws HttpFetchException {
-		final HttpGet get = new HttpGet(url);
-		return executeRequestAndReadBytes(get);
-	}
-	
-	public String post(HttpPost post) throws HttpFetchException {
+	public String post(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.info("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
 	}
 	
-	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpFetchException {
+	public byte[] getBytes(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.info("Executing GET to: " + url);
+		return executeRequestAndReadBytes(new HttpGet(url));
+	}
+	
+	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {		
+		final byte[] responseBytes = executeRequestAndReadBytes(get);
 		try {
-			final HttpResponse response = executeRequest(get);
-			final int statusCode = response.getStatusLine().getStatusCode();
-			if (statusCode == HttpStatus.SC_OK) {
-				return EntityUtils.toString(response.getEntity(), UTF_8);
-			}
-			
-			EntityUtils.consume(response.getEntity());
-			throw new HttpFetchException(new RuntimeException("Non 200 http response code: " + statusCode));
-			
-		} catch (Exception e) {
-			throw new HttpFetchException(e);
+			return new String(responseBytes, UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 	
-	private byte[] executeRequestAndReadBytes(final HttpRequestBase get) throws HttpFetchException {
+	private byte[] executeRequestAndReadBytes(final HttpRequestBase request) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException  {
 		try {
-			final HttpResponse response = executeRequest(get);
+			final HttpResponse response = executeRequest(request);
 			final int statusCode = response.getStatusLine().getStatusCode();
+			log.debug("Http response status code is: " + statusCode);
 			if (statusCode == HttpStatus.SC_OK) {
 				return EntityUtils.toByteArray(response.getEntity());
 			}
 			
-			EntityUtils.consume(response.getEntity());
-			throw new HttpFetchException(new RuntimeException("Non 200 http response code: " + statusCode));
+			final String responseBody = EntityUtils.toString(response.getEntity());
+			if (statusCode == HttpStatus.SC_NOT_FOUND) {
+				throw new HttpNotFoundException(responseBody);
+			} else if (statusCode == HttpStatus.SC_BAD_REQUEST) {
+				throw new HttpBadRequestException(responseBody);
+			} else if (statusCode == HttpStatus.SC_FORBIDDEN) {
+				throw new HttpForbiddenException(responseBody);
+			}			
+			throw new HttpFetchException(responseBody);
 			
-		} catch (Exception e) {
+		} catch (IOException e) {
+			log.debug("Throwing general http fetch io exception", e);
 			throw new HttpFetchException(e);
 		}
 	}
