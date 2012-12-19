@@ -23,6 +23,8 @@ import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
+import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -51,6 +53,10 @@ public class HttpFetcher {
 		params = new BasicHttpParams();
 	    SchemeRegistry registry = new SchemeRegistry();
 	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+	    SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+	    sslSocketFactory.setHostnameVerifier(new AllowAllHostnameVerifier());
+		registry.register(new Scheme("https",sslSocketFactory, 443));
+	    
 	    connectionManager = new ThreadSafeClientConnManager(params, registry);
 	}
 	
