@@ -89,18 +89,28 @@ public class HttpFetcher {
 			final HttpResponse response = executeRequest(request);
 			final int statusCode = response.getStatusLine().getStatusCode();
 			log.debug("Http response status code is: " + statusCode);
+
 			if (statusCode == HttpStatus.SC_OK) {
-				return EntityUtils.toByteArray(response.getEntity());
+				final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
+				EntityUtils.consume(response.getEntity());
+				return byteArray;
 			}
 			
 			final String responseBody = EntityUtils.toString(response.getEntity());
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
+				EntityUtils.consume(response.getEntity());
 				throw new HttpNotFoundException(responseBody);
+				
 			} else if (statusCode == HttpStatus.SC_BAD_REQUEST) {
+				EntityUtils.consume(response.getEntity());
 				throw new HttpBadRequestException(responseBody);
+				
 			} else if (statusCode == HttpStatus.SC_FORBIDDEN) {
+				EntityUtils.consume(response.getEntity());
 				throw new HttpForbiddenException(responseBody);
-			}			
+			}
+			
+			EntityUtils.consume(response.getEntity());
 			throw new HttpFetchException(responseBody);
 			
 		} catch (IOException e) {
