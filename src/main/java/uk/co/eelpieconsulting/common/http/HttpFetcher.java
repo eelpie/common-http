@@ -114,7 +114,7 @@ public class HttpFetcher {
 			throw new HttpFetchException(responseBody);
 			
 		} catch (IOException e) {
-			log.debug("Throwing general http fetch io exception", e);
+			log.warn("Throwing general http fetch io exception", e);
 			throw new HttpFetchException(e);
 		}
 	}
