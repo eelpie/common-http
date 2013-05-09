@@ -3,6 +3,7 @@ package uk.co.eelpieconsulting.common.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -28,9 +29,8 @@ import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.HttpEntityWrapper;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
@@ -50,14 +50,16 @@ public class HttpFetcher {
 	private ClientConnectionManager connectionManager;
 
 	public HttpFetcher() {
-		params = new BasicHttpParams();
-	    SchemeRegistry registry = new SchemeRegistry();
+	    final SchemeRegistry registry = new SchemeRegistry();
 	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
-	    SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();
+	    
+	    SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();	    
 	    sslSocketFactory.setHostnameVerifier(new AllowAllHostnameVerifier());
 		registry.register(new Scheme("https",sslSocketFactory, 443));
 	    
-	    connectionManager = new ThreadSafeClientConnManager(params, registry);
+	    final PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(registry);
+	    poolingClientConnectionManager.setDefaultMaxPerRoute(10);
+		connectionManager = poolingClientConnectionManager;
 	}
 	
 	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
@@ -78,7 +80,10 @@ public class HttpFetcher {
 	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {		
 		final byte[] responseBytes = executeRequestAndReadBytes(get);
 		try {
+			connectionManager.closeExpiredConnections();
+			connectionManager.closeIdleConnections(10, TimeUnit.SECONDS);
 			return new String(responseBytes, UTF_8);
+			
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}
