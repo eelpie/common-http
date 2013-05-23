@@ -47,7 +47,8 @@ public class HttpFetcher {
 	private static final int HTTP_TIMEOUT = 15000;
 	
 	private HttpParams params;
-	private ClientConnectionManager connectionManager;
+	private PoolingClientConnectionManager connectionManager;
+	private HttpClient client;
 
 	public HttpFetcher() {
 	    final SchemeRegistry registry = new SchemeRegistry();
@@ -55,12 +56,14 @@ public class HttpFetcher {
 	    
 	    SSLSocketFactory sslSocketFactory = SSLSocketFactory.getSocketFactory();	    
 	    sslSocketFactory.setHostnameVerifier(new AllowAllHostnameVerifier());
-		registry.register(new Scheme("https",sslSocketFactory, 443));
+		registry.register(new Scheme("https", sslSocketFactory, 443));
 	    
 	    final PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(registry);
 	    poolingClientConnectionManager.setDefaultMaxPerRoute(5);
 	    poolingClientConnectionManager.setMaxTotal(10);
 		connectionManager = poolingClientConnectionManager;
+		
+		client = setupHttpClient();
 	}
 	
 	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
@@ -89,10 +92,11 @@ public class HttpFetcher {
 	}
 	
 	private byte[] executeRequestAndReadBytes(final HttpRequestBase request) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException  {
+		log.info("Connection stats: " + connectionManager.getTotalStats().toString());
 		try {
 			final HttpResponse response = executeRequest(request);
 			final int statusCode = response.getStatusLine().getStatusCode();
-			log.debug("Http response status code is: " + statusCode);
+			log.info("Http response status code is: " + statusCode);
 
 			if (statusCode == HttpStatus.SC_OK) {
 				final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
@@ -105,29 +109,39 @@ public class HttpFetcher {
 			final String responseBody = EntityUtils.toString(response.getEntity());
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
 				EntityUtils.consume(response.getEntity());
+				request.releaseConnection();
+				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				throw new HttpNotFoundException(responseBody);
 				
 			} else if (statusCode == HttpStatus.SC_BAD_REQUEST) {
 				EntityUtils.consume(response.getEntity());
+				request.releaseConnection();
+				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				throw new HttpBadRequestException(responseBody);
 				
 			} else if (statusCode == HttpStatus.SC_FORBIDDEN) {
 				EntityUtils.consume(response.getEntity());
+				request.releaseConnection();
+				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				throw new HttpForbiddenException(responseBody);
 			}
 			
 			EntityUtils.consume(response.getEntity());
+			request.releaseConnection();
+			connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 			throw new HttpFetchException(responseBody);
 			
 		} catch (IOException e) {
 			log.warn("Throwing general http fetch io exception", e);
+			request.releaseConnection();
+			connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 			throw new HttpFetchException(e);
 		}
 	}
 	
 	private HttpResponse executeRequest(HttpRequestBase request) throws IOException, ClientProtocolException {
 		request.addHeader(new BasicHeader(ACCEPT_ENCODING, GZIP));
-		return setupHttpClient().execute(request);
+		return client.execute(request);
 	}
 	
 	private HttpClient setupHttpClient() {
