@@ -58,7 +58,8 @@ public class HttpFetcher {
 		registry.register(new Scheme("https",sslSocketFactory, 443));
 	    
 	    final PoolingClientConnectionManager poolingClientConnectionManager = new PoolingClientConnectionManager(registry);
-	    poolingClientConnectionManager.setDefaultMaxPerRoute(10);
+	    poolingClientConnectionManager.setDefaultMaxPerRoute(5);
+	    poolingClientConnectionManager.setMaxTotal(10);
 		connectionManager = poolingClientConnectionManager;
 	}
 	
@@ -78,10 +79,8 @@ public class HttpFetcher {
 	}
 	
 	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {		
-		final byte[] responseBytes = executeRequestAndReadBytes(get);
 		try {
-			connectionManager.closeExpiredConnections();
-			connectionManager.closeIdleConnections(10, TimeUnit.SECONDS);
+			final byte[] responseBytes = executeRequestAndReadBytes(get);		
 			return new String(responseBytes, UTF_8);
 			
 		} catch (UnsupportedEncodingException e) {
@@ -98,6 +97,8 @@ public class HttpFetcher {
 			if (statusCode == HttpStatus.SC_OK) {
 				final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
 				EntityUtils.consume(response.getEntity());
+				request.releaseConnection();
+				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				return byteArray;
 			}
 			
