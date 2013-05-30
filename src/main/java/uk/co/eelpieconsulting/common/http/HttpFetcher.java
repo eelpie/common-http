@@ -100,41 +100,28 @@ public class HttpFetcher {
 
 			if (statusCode == HttpStatus.SC_OK) {
 				final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
-				EntityUtils.consume(response.getEntity());
-				request.releaseConnection();
-				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				return byteArray;
 			}
 			
 			final String responseBody = EntityUtils.toString(response.getEntity());
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
 				EntityUtils.consume(response.getEntity());
-				request.releaseConnection();
-				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				throw new HttpNotFoundException(responseBody);
 				
 			} else if (statusCode == HttpStatus.SC_BAD_REQUEST) {
 				EntityUtils.consume(response.getEntity());
-				request.releaseConnection();
-				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				throw new HttpBadRequestException(responseBody);
 				
 			} else if (statusCode == HttpStatus.SC_FORBIDDEN) {
 				EntityUtils.consume(response.getEntity());
-				request.releaseConnection();
-				connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 				throw new HttpForbiddenException(responseBody);
 			}
 			
 			EntityUtils.consume(response.getEntity());
-			request.releaseConnection();
-			connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 			throw new HttpFetchException(responseBody);
 			
 		} catch (IOException e) {
 			log.warn("Throwing general http fetch io exception", e);
-			request.releaseConnection();
-			connectionManager.closeIdleConnections(0, TimeUnit.SECONDS);
 			throw new HttpFetchException(e);
 		}
 	}
