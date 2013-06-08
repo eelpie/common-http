@@ -92,11 +92,11 @@ public class HttpFetcher {
 	}
 	
 	private byte[] executeRequestAndReadBytes(final HttpRequestBase request) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException  {
-		log.info("Connection stats: " + connectionManager.getTotalStats().toString());
+		log.debug("Connection stats: " + connectionManager.getTotalStats().toString());
 		try {
 			final HttpResponse response = executeRequest(request);
 			final int statusCode = response.getStatusLine().getStatusCode();
-			log.info("Http response status code is: " + statusCode);
+			log.debug("Http response status code is: " + statusCode);
 
 			if (statusCode == HttpStatus.SC_OK) {
 				final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
