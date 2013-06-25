@@ -3,7 +3,6 @@ package uk.co.eelpieconsulting.common.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -17,10 +16,10 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -74,6 +73,11 @@ public class HttpFetcher {
 	public String post(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
 		log.info("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
+	}
+	
+	public String delete(HttpDelete delete) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.info("Executing DELETE to: " + delete.getURI());
+		return executeRequestAndReadResponseBody(delete);		
 	}
 	
 	public byte[] getBytes(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
