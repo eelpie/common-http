@@ -75,7 +75,7 @@ public class HttpFetcher {
 		log.info("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
 	}
-	public String post(HttpPut put) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+	public String put(HttpPut put) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
 		log.info("Executing PUT to: " + put.getURI());
 		return executeRequestAndReadResponseBody(put);		
 	}
