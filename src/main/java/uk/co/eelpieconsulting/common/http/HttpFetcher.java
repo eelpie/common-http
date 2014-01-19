@@ -19,6 +19,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
@@ -74,7 +75,11 @@ public class HttpFetcher {
 		log.info("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
 	}
-	
+	public String post(HttpPut put) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.info("Executing PUT to: " + put.getURI());
+		return executeRequestAndReadResponseBody(put);		
+	}
+		
 	public String delete(HttpDelete delete) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
 		log.info("Executing DELETE to: " + delete.getURI());
 		return executeRequestAndReadResponseBody(delete);		

@@ -5,7 +5,7 @@
 	<artifactId>common-http</artifactId>
 	<packaging>jar</packaging>
 	<name>Common HTTP</name>
-	<version>1.1.4</version>
+	<version>1.1.5</version>
 	<description>Shared gzip aware HTTP fetcher</description>
 	<build>
 		<plugins>
