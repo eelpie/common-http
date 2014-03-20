@@ -3,6 +3,7 @@ package uk.co.eelpieconsulting.common.http;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -69,6 +70,15 @@ public class HttpFetcher {
 	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
 		log.info("Executing GET to: " + url);
 		return executeRequestAndReadResponseBody(new HttpGet(url));
+	}
+
+	public String get(String url, Map<String, String> headers) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.info("Executing GET to: " + url + " with headers: " + headers);
+		HttpGet get = new HttpGet(url);
+		for (String header : headers.keySet()) {
+			get.addHeader(new BasicHeader(header, headers.get(header)));
+		}
+		return executeRequestAndReadResponseBody(get);
 	}
 	
 	public String post(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
