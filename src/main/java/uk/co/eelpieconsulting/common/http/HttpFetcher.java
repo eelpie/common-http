@@ -53,6 +53,10 @@ public class HttpFetcher {
 	private final String characterEncoding;
 
 	public HttpFetcher() {
+		this(UTF_8);
+	}
+	
+	public HttpFetcher(String characterEncoding) {
 	    final SchemeRegistry registry = new SchemeRegistry();
 	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 	    
@@ -66,7 +70,7 @@ public class HttpFetcher {
 		connectionManager = poolingClientConnectionManager;
 		
 		client = setupHttpClient();
-		this.characterEncoding = UTF_8;
+		this.characterEncoding = characterEncoding;
 	}
 	
 	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
