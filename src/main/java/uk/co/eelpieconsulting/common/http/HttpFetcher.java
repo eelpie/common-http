@@ -47,9 +47,10 @@ public class HttpFetcher {
 	private static final String ACCEPT_ENCODING = "Accept-Encoding";
 	private static final int HTTP_TIMEOUT = 15000;
 	
-	private HttpParams params;
-	private PoolingClientConnectionManager connectionManager;
-	private HttpClient client;
+	private final PoolingClientConnectionManager connectionManager;
+	private final HttpClient client;
+
+	private final String characterEncoding;
 
 	public HttpFetcher() {
 	    final SchemeRegistry registry = new SchemeRegistry();
@@ -65,6 +66,7 @@ public class HttpFetcher {
 		connectionManager = poolingClientConnectionManager;
 		
 		client = setupHttpClient();
+		this.characterEncoding = UTF_8;
 	}
 	
 	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
@@ -103,7 +105,7 @@ public class HttpFetcher {
 	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {		
 		try {
 			final byte[] responseBytes = executeRequestAndReadBytes(get);		
-			return new String(responseBytes, UTF_8);
+			return new String(responseBytes, characterEncoding);
 			
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
@@ -151,7 +153,7 @@ public class HttpFetcher {
 	}
 	
 	private HttpClient setupHttpClient() {
-	    HttpClient client = new DefaultHttpClient(connectionManager, params);	    
+	    HttpClient client = new DefaultHttpClient(connectionManager);	    
 		((AbstractHttpClient) client)
 				.addRequestInterceptor(new HttpRequestInterceptor() {
 					public void process(final HttpRequest request,
