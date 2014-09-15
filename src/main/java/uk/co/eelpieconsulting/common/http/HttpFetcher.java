@@ -136,19 +136,15 @@ public class HttpFetcher {
 			
 			final String responseBody = EntityUtils.toString(response.getEntity());
 			if (statusCode == HttpStatus.SC_NOT_FOUND) {
-				EntityUtils.consume(response.getEntity());
 				throw new HttpNotFoundException(responseBody);
 				
 			} else if (statusCode == HttpStatus.SC_BAD_REQUEST) {
-				EntityUtils.consume(response.getEntity());
 				throw new HttpBadRequestException(responseBody);
 				
 			} else if (statusCode == HttpStatus.SC_FORBIDDEN) {
-				EntityUtils.consume(response.getEntity());
 				throw new HttpForbiddenException(responseBody);
 			}
 			
-			EntityUtils.consume(response.getEntity());
 			throw new HttpFetchException(responseBody);
 			
 		} catch (IOException e) {
