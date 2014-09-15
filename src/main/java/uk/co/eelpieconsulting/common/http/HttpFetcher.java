@@ -112,9 +112,9 @@ public class HttpFetcher {
 		return executeRequestAndReadBytes(new HttpGet(url));
 	}
 	
-	private String executeRequestAndReadResponseBody(final HttpRequestBase get) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {		
+	private String executeRequestAndReadResponseBody(final HttpRequestBase request) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {		
 		try {
-			final byte[] responseBytes = executeRequestAndReadBytes(get);		
+			final byte[] responseBytes = executeRequestAndReadBytes(request);		
 			return new String(responseBytes, characterEncoding);
 			
 		} catch (UnsupportedEncodingException e) {
