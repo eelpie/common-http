@@ -34,7 +34,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
@@ -75,17 +74,17 @@ public class HttpFetcher {
 	}
 	
 	public String get(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing GET to: " + url);
+		log.debug("Executing GET to: " + url);
 		return executeRequestAndReadResponseBody(new HttpGet(url));
 	}
 	
 	public String get(URI uri) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing GET to: " + uri.toString());
+		log.debug("Executing GET to: " + uri.toString());
 		return executeRequestAndReadResponseBody(new HttpGet(uri));
 	}
 	
 	public String get(String url, Map<String, String> headers) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing GET to: " + url + " with headers: " + headers);
+		log.debug("Executing GET to: " + url + " with headers: " + headers);
 		HttpGet get = new HttpGet(url);
 		for (String header : headers.keySet()) {
 			get.addHeader(new BasicHeader(header, headers.get(header)));
@@ -94,21 +93,21 @@ public class HttpFetcher {
 	}
 	
 	public String post(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing POST to: " + post.getURI());
+		log.debug("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
 	}
 	public String put(HttpPut put) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing PUT to: " + put.getURI());
+		log.debug("Executing PUT to: " + put.getURI());
 		return executeRequestAndReadResponseBody(put);		
 	}
 		
 	public String delete(HttpDelete delete) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing DELETE to: " + delete.getURI());
+		log.debug("Executing DELETE to: " + delete.getURI());
 		return executeRequestAndReadResponseBody(delete);		
 	}
 	
 	public byte[] getBytes(String url) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
-		log.info("Executing GET to: " + url);
+		log.debug("Executing GET to: " + url);
 		return executeRequestAndReadBytes(new HttpGet(url));
 	}
 	
