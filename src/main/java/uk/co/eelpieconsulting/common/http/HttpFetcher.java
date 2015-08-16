@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
@@ -145,6 +146,10 @@ public class HttpFetcher {
 			}
 			
 			throw new HttpFetchException(responseBody);
+			
+		} catch (UnknownHostException e) {	
+			log.info("Caught unknown host exception");
+			throw new HttpFetchException(e);
 			
 		} catch (IOException e) {
 			log.warn("Throwing general http fetch io exception", e);
