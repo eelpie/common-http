@@ -97,6 +97,12 @@ public class HttpFetcher {
 		log.debug("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
 	}
+	
+	public byte[] postBytes(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.debug("Executing POST to: " + post.getURI());
+		return executeRequestAndReadBytes(post);		
+	}
+	
 	public String put(HttpPut put) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
 		log.debug("Executing PUT to: " + put.getURI());
 		return executeRequestAndReadResponseBody(put);		
