@@ -19,11 +19,7 @@ import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -91,6 +87,15 @@ public class HttpFetcher {
 			get.addHeader(new BasicHeader(header, headers.get(header)));
 		}
 		return executeRequestAndReadResponseBody(get);
+	}
+
+	public String options(String url, Map<String, String> headers) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.debug("Executing OPTIONS to: " + url + " with headers: " + headers);
+		HttpOptions options = new HttpOptions(url);
+		for (String header : headers.keySet()) {
+			options.addHeader(new BasicHeader(header, headers.get(header)));
+		}
+		return executeRequestAndReadResponseBody(options);
 	}
 	
 	public String post(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
