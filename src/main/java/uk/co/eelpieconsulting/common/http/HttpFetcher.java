@@ -102,6 +102,15 @@ public class HttpFetcher {
 		log.debug("Executing POST to: " + post.getURI());
 		return executeRequestAndReadResponseBody(post);		
 	}
+
+	public String post(String url, Map<String, String> headers) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
+		log.debug("Executing OPTIONS to: " + url + " with headers: " + headers);
+		HttpPost post = new HttpPost(url);
+		for (String header : headers.keySet()) {
+			post.addHeader(new BasicHeader(header, headers.get(header)));
+		}
+		return executeRequestAndReadResponseBody(post);
+	}
 	
 	public byte[] postBytes(HttpPost post) throws HttpNotFoundException, HttpBadRequestException, HttpForbiddenException, HttpFetchException {
 		log.debug("Executing POST to: " + post.getURI());
