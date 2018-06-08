@@ -149,7 +149,7 @@ public class HttpFetcher {
 			final int statusCode = response.getStatusLine().getStatusCode();
 			log.debug("Http response status code is: " + statusCode);
 
-			if (statusCode == HttpStatus.SC_OK) {
+			if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_ACCEPTED) {
 				final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
 				return byteArray;
 			}
