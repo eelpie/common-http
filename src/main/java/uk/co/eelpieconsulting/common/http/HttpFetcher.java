@@ -1,22 +1,6 @@
 package uk.co.eelpieconsulting.common.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.UnknownHostException;
-import java.util.Map;
-import java.util.zip.GZIPInputStream;
-
-import org.apache.http.Header;
-import org.apache.http.HeaderElement;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.HttpStatus;
+import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
@@ -31,9 +15,18 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.PoolingClientConnectionManager;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.UnknownHostException;
+import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
 public class HttpFetcher {
 	
@@ -50,10 +43,10 @@ public class HttpFetcher {
 	private final String characterEncoding;
 
 	public HttpFetcher() {
-		this(UTF_8);
+		this(UTF_8, null);
 	}
 	
-	public HttpFetcher(String characterEncoding) {
+	public HttpFetcher(String characterEncoding, String userAgent) {
 	    final SchemeRegistry registry = new SchemeRegistry();
 	    registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
 	    
@@ -66,7 +59,7 @@ public class HttpFetcher {
 	    poolingClientConnectionManager.setMaxTotal(10);
 		connectionManager = poolingClientConnectionManager;
 		
-		client = setupHttpClient();
+		client = setupHttpClient(userAgent);
 		this.characterEncoding = characterEncoding;
 	}
 	
@@ -182,7 +175,7 @@ public class HttpFetcher {
 		return client.execute(request);
 	}
 	
-	private HttpClient setupHttpClient() {
+	private HttpClient setupHttpClient(String userAgent) {
 	    HttpClient client = new DefaultHttpClient(connectionManager);	    
 		((AbstractHttpClient) client)
 				.addRequestInterceptor(new HttpRequestInterceptor() {
@@ -213,6 +206,10 @@ public class HttpFetcher {
 		
 		client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, new Integer(HTTP_TIMEOUT));
 		client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, new Integer(HTTP_TIMEOUT));
+
+		if (userAgent != null) {
+			client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
+		}
 		return client;
 	}
 
