@@ -46,6 +46,10 @@ public class HttpFetcher {
     }
 
     public HttpFetcher(String characterEncoding, String userAgent) {
+        this(characterEncoding, userAgent, HTTP_TIMEOUT);
+    }
+
+    public HttpFetcher(String characterEncoding, String userAgent, int timeout) {
         log.info("Init'ing with character encoding and user agent: " + characterEncoding + " / " + userAgent);
 
         final SchemeRegistry registry = new SchemeRegistry();
@@ -60,7 +64,7 @@ public class HttpFetcher {
         poolingClientConnectionManager.setMaxTotal(10);
         connectionManager = poolingClientConnectionManager;
 
-        client = setupHttpClient(userAgent, HTTP_TIMEOUT);
+        client = setupHttpClient(userAgent, timeout);
         this.characterEncoding = characterEncoding;
     }
 
