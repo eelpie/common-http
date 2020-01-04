@@ -60,7 +60,7 @@ public class HttpFetcher {
         poolingClientConnectionManager.setMaxTotal(10);
         connectionManager = poolingClientConnectionManager;
 
-        client = setupHttpClient(userAgent);
+        client = setupHttpClient(userAgent, HTTP_TIMEOUT);
         this.characterEncoding = characterEncoding;
     }
 
@@ -176,7 +176,7 @@ public class HttpFetcher {
         return client.execute(request);
     }
 
-    private HttpClient setupHttpClient(String userAgent) {
+    private HttpClient setupHttpClient(String userAgent, int timeout) {
         HttpClient client = new DefaultHttpClient(connectionManager);
         ((AbstractHttpClient) client)
                 .addRequestInterceptor(new HttpRequestInterceptor() {
@@ -205,8 +205,8 @@ public class HttpFetcher {
             }
         });
 
-        client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, new Integer(HTTP_TIMEOUT));
-        client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, new Integer(HTTP_TIMEOUT));
+        client.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, new Integer(timeout));
+        client.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, new Integer(timeout));
 
         if (userAgent != null) {
             client.getParams().setParameter(CoreProtocolPNames.USER_AGENT, userAgent);
