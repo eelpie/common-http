@@ -145,7 +145,7 @@ public class HttpFetcher {
         try {
             final HttpResponse response = executeRequest(request);
             final int statusCode = response.getStatusLine().getStatusCode();
-            log.debug("Http response status code is: " + statusCode);
+
 
             if (statusCode == HttpStatus.SC_OK || statusCode == HttpStatus.SC_ACCEPTED) {
                 final byte[] byteArray = EntityUtils.toByteArray(response.getEntity());
@@ -158,9 +158,10 @@ public class HttpFetcher {
 
             } else if (statusCode == HttpStatus.SC_BAD_REQUEST) {
                 throw new HttpBadRequestException(responseBody);
-
             } else if (statusCode == HttpStatus.SC_FORBIDDEN) {
                 throw new HttpForbiddenException(responseBody);
+            } else if (statusCode == HttpStatus.SC_PRECONDITION_FAILED) {
+                throw new HttpPreconditionFailedException(responseBody);
             }
 
             throw new HttpFetchException(responseBody);
